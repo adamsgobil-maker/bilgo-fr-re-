@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Bilgo & Frères — Pièces moto et vélo</title>
+<meta name="theme-color" content="#1A1A18">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1A1A18;
+    --paper: #F2EDE4;
+    --rust: #C8721A;
+    --olive: #3D4A42;
+    --steel: #8A8478;
+    --line: #322F29;
+    --danger: #A8402B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1, h2, h3, .display {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  header {
+    padding: 18px 16px 14px;
+    border-bottom: 2px solid var(--rust);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header .brand h1 { font-size: 22px; margin: 0; line-height: 1; }
+  header .brand p { margin: 4px 0 0; font-size: 11px; color: var(--steel); letter-spacing: 0.03em; }
+  #cart-btn {
+    position: relative;
+    background: none;
+    border: 1.5px solid var(--steel);
+    color: var(--paper);
+    border-radius: 4px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  #cart-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: var(--rust);
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+  }
+  #search-wrap { padding: 12px 16px 0; }
+  #search {
+    width: 100%;
+    background: #24231F;
+    border: 1px solid var(--line);
+    color: var(--paper);
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+  }
+  #search::placeholder { color: var(--steel); }
+  #cat-tabs { display: flex; gap: 6px; padding: 12px 16px 0; overflow-x: auto; }
+  .tab {
+    font-family: 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--steel);
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .tab.active { background: var(--rust); border-color: var(--rust); color: var(--ink); }
+  #sub-tabs { display: flex; gap: 8px; padding: 10px 16px 4px; overflow-x: auto; }
+  .sub {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 12px;
+    background: #24231F;
+    color: var(--steel);
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .sub.active { color: var(--paper); border-color: var(--steel); }
+  #grid {
+    padding: 12px 16px 100px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .card {
+    background: #211F1B;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 10px;
+    text-align: left;
+  }
+  .card .thumb {
+    width: 100%;
+    height: 76px;
+    background: #171613;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    font-size: 26px;
+    color: var(--steel);
+  }
+  .card .cat-label { font-size: 10px; color: var(--steel); text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 2px; }
+  .card .name { font-size: 13px; font-weight: 600; margin: 0 0 2px; line-height: 1.25; }
+  .card .price { font-size: 13px; color: var(--rust); margin: 4px 0 6px; font-weight: 600; }
+  .status { font-size: 10px; padding: 2px 7px; border-radius: 3px; display: inline-block; text-transform: uppercase; letter-spacing: 0.03em; }
+  .status.dispo { background: rgba(61,74,66,0.35); color: #9FB8A8; border: 1px solid var(--olive); }
+  .status.indispo { background: rgba(168,64,43,0.2); color: #E0A08F; border: 1px solid var(--danger); }
+  #detail { position: fixed; inset: 0; background: var(--ink); display: none; flex-direction: column; z-index: 30; }
+  #detail.open { display: flex; }
+  #detail-top { padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+  #detail-back { background: none; border: none; color: var(--paper); font-size: 20px; padding: 0; }
+  #detail-body { padding: 18px 16px; overflow-y: auto; flex: 1; }
+  #detail-body .thumb-lg {
+    width: 100%; height: 180px; background: #211F1B; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; font-size: 44px; color: var(--steel); margin-bottom: 16px;
+  }
+  #detail-body h2 { font-size: 22px; margin: 0 0 4px; }
+  #detail-body .cat-label { color: var(--steel); font-size: 12px; margin: 0 0 12px; }
+  .price-row { display: flex; gap: 18px; margin: 10px 0 16px; }
+  .price-block .label { font-size: 11px; color: var(--steel); text-transform: uppercase; letter-spacing: 0.03em; }
+  .price-block .val { font-size: 20px; font-weight: 700; color: var(--rust); font-family: 'Barlow Condensed', sans-serif; }
+  .qty-row {
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 14px 0; margin: 18px 0;
+  }
+  .qty-controls { display: flex; align-items: center; gap: 14px; }
+  .qty-controls button { width: 32px; height: 32px; border: 1.5px solid var(--steel); background: none; color: var(--paper); border-radius: 4px; font-size: 16px; }
+  #detail-actions { padding: 12px 16px 24px; display: flex; flex-direction: column; gap: 8px; }
+  .btn {
+    width: 100%; padding: 13px; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; border: none;
+  }
+  .btn-outline { background: transparent; border: 1.5px solid var(--steel); color: var(--paper); }
+  .btn-whatsapp { background: #25D366; color: #08240F; }
+  #cart { position: fixed; inset: 0; background: var(--ink); display: none; flex-direction: column; z-index: 40; }
+  #cart.open { display: flex; }
+  #cart-top { padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+  #cart-items { flex: 1; overflow-y: auto; padding: 10px 16px; }
+  .cart-line { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .cart-line .info .name { font-size: 13px; font-weight: 600; margin: 0; }
+  .cart-line .info .meta { font-size: 11px; color: var(--steel); margin: 2px 0 0; }
+  .cart-line .qty { font-size: 12px; color: var(--steel); }
+  #cart-footer { padding: 14px 16px 24px; border-top: 1px solid var(--line); }
+  #cart-total { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  #cart-total .label { font-size: 13px; color: var(--steel); text-transform: uppercase; letter-spacing: 0.03em; }
+  #cart-total .val { font-size: 22px; font-weight: 700; font-family: 'Barlow Condensed', sans-serif; color: var(--rust); }
+  #empty-cart { color: var(--steel); font-size: 13px; text-align: center; padding: 40px 20px; }
+  #mini-cart {
+    position: fixed; bottom: 0; left: 0; right: 0; background: #211F1B; border-top: 1px solid var(--rust);
+    padding: 12px 16px; display: none; align-items: center; justify-content: space-between; z-index: 20;
+  }
+  #mini-cart.show { display: flex; }
+  #mini-cart .txt p { margin: 0; }
+  #mini-cart .txt .n { font-size: 12px; color: var(--steel); }
+  #mini-cart .txt .t { font-size: 14px; font-weight: 600; }
+  #mini-cart button {
+    background: var(--rust); color: var(--ink); border: none; padding: 9px 16px; border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 13px; letter-spacing: 0.03em;
+  }
+  .icon-cart::before { content: "🧺"; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>Bilgo &amp; Frères</h1>
+    <p>Pièces moto &amp; vélo — retrait en boutique</p>
+  </div>
+  <button id="cart-btn" class="icon-cart" onclick="openCart()">
+    <span id="cart-count">0</span>
+  </button>
+</header>
+
+<div id="search-wrap">
+  <input id="search" type="text" placeholder="Rechercher une pièce...">
+</div>
+
+<div id="cat-tabs"></div>
+<div id="sub-tabs"></div>
+<div id="grid"></div>
+
+<div id="mini-cart">
+  <div class="txt">
+    <p class="n" id="mini-n">0 article</p>
+    <p class="t" id="mini-t">0 FCFA</p>
+  </div>
+  <button onclick="openCart()">Voir le panier</button>
+</div>
+
+<div id="detail">
+  <div id="detail-top">
+    <button id="detail-back" onclick="closeDetail()">&#8592;</button>
+    <span style="font-size:13px; color: var(--steel);">Détail du produit</span>
+  </div>
+  <div id="detail-body"></div>
+  <div id="detail-actions">
+    <button class="btn btn-outline" onclick="addToCartFromDetail()">Ajouter au panier</button>
+    <button class="btn btn-whatsapp" onclick="orderNowFromDetail()">Commander directement</button>
+  </div>
+</div>
+
+<div id="cart">
+  <div id="cart-top">
+    <button onclick="closeCart()" style="background:none;border:none;color:var(--paper);font-size:20px;">&#8592;</button>
+    <span style="font-size:13px; color: var(--steel);">Votre panier</span>
+  </div>
+  <div id="cart-items"></div>
+  <div id="cart-footer">
+    <div id="cart-total">
+      <span class="label">Total estimé</span>
+      <span class="val" id="cart-total-val">0 FCFA</span>
+    </div>
+    <button class="btn btn-whatsapp" onclick="sendWhatsAppOrder()">Commander sur WhatsApp</button>
+  </div>
+</div>
+
+<script src="catalog-data.js"></script>
+<script>
+  const WHATSAPP_NUMBER = "22658159636";
+  let currentCat = "Tous";
+  let currentSub = "Toutes";
+  let searchTerm = "";
+  let cart = [];
+  let activeDetailIndex = null;
+  let detailQty = 1;
+
+  function money(n) {
+    if (n === null || n === undefined || n === "") return "—";
+    return n.toLocaleString('fr-FR') + " FCFA";
+  }
+  function getCategories() { return ["Tous", ...new Set(CATALOG.map(p => p.cat))]; }
+  function getSubcats(cat) {
+    if (cat === "Tous") return [];
+    return ["Toutes", ...new Set(CATALOG.filter(p => p.cat === cat).map(p => p.sub))];
+  }
+  function renderCatTabs() {
+    const wrap = document.getElementById('cat-tabs');
+    wrap.innerHTML = "";
+    getCategories().forEach(cat => {
+      const b = document.createElement('button');
+      b.className = 'tab' + (cat === currentCat ? ' active' : '');
+      b.textContent = cat;
+      b.onclick = () => { currentCat = cat; currentSub = "Toutes"; renderCatTabs(); renderSubTabs(); renderGrid(); };
+      wrap.appendChild(b);
+    });
+  }
+  function renderSubTabs() {
+    const wrap = document.getElementById('sub-tabs');
+    wrap.innerHTML = "";
+    getSubcats(currentCat).forEach(sub => {
+      const b = document.createElement('button');
+      b.className = 'sub' + (sub === currentSub ? ' active' : '');
+      b.textContent = sub;
+      b.onclick = () => { currentSub = sub; renderSubTabs(); renderGrid(); };
+      wrap.appendChild(b);
+    });
+  }
+  function filteredProducts() {
+    return CATALOG.filter((p, i) => {
+      p._i = i;
+      if (currentCat !== "Tous" && p.cat !== currentCat) return false;
+      if (currentSub !== "Toutes" && p.sub !== currentSub) return false;
+      if (searchTerm) {
+        const hay = (p.name + " " + p.quality + " " + p.sub).toLowerCase();
+        if (!hay.includes(searchTerm.toLowerCase())) return false;
+      }
+      return true;
+    });
+  }
+  function renderGrid() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = "";
+    const list = filteredProducts();
+    if (list.length === 0) {
+      grid.innerHTML = '<p style="grid-column: 1/-1; color: var(--steel); font-size:13px; text-align:center; padding: 30px 0;">Aucun produit trouvé.</p>';
+      return;
+    }
+    list.forEach((p) => {
+      const price = p.priceUnit ?? p.priceCarton;
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.onclick = () => openDetail(p._i);
+      card.innerHTML = `
+        <div class="thumb">⚙️</div>
+        <p class="cat-label">${p.sub}</p>
+        <p class="name">${p.name}${p.quality ? ' — ' + p.quality : ''}</p>
+        <p class="price">${money(price)}</p>
+        <span class="status ${p.stock === 'Disponible' ? 'dispo' : 'indispo'}">${p.stock}</span>
+      `;
+      grid.appendChild(card);
+    });
+  }
+  document.getElementById('search').addEventListener('input', (e) => {
+    searchTerm = e.target.value;
+    renderGrid();
+  });
+  function openDetail(index) {
+    activeDetailIndex = index;
+    detailQty = 1;
+    renderDetail();
+    document.getElementById('detail').classList.add('open');
+  }
+  function closeDetail() { document.getElementById('detail').classList.remove('open'); }
+  function renderDetail() {
+    const p = CATALOG[activeDetailIndex];
+    const body = document.getElementById('detail-body');
+    let priceHtml = "";
+    if (p.priceUnit) priceHtml += `<div class="price-block"><div class="label">Unité</div><div class="val">${money(p.priceUnit)}</div></div>`;
+    if (p.priceCarton) priceHtml += `<div class="price-block"><div class="label">Carton</div><div class="val">${money(p.priceCarton)}</div></div>`;
+    if (!priceHtml) priceHtml = `<div class="price-block"><div class="label">Prix</div><div class="val">Nous consulter</div></div>`;
+    body.innerHTML = `
+      <div class="thumb-lg">⚙️</div>
+      <h2>${p.name}${p.quality ? ' — ' + p.quality : ''}</h2>
+      <p class="cat-label">${p.cat} &gt; ${p.sub}</p>
+      <span class="status ${p.stock === 'Disponible' ? 'dispo' : 'indispo'}">${p.stock}</span>
+      <div class="price-row">${priceHtml}</div>
+      <div class="qty-row">
+        <span style="font-size:13px; color: var(--steel);">Quantité</span>
+        <div class="qty-controls">
+          <button onclick="changeQty(-1)">−</button>
+          <span id="qty-val" style="font-weight:600;">${detailQty}</span>
+          <button onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+    `;
+  }
+  function changeQty(delta) {
+    detailQty = Math.max(1, detailQty + delta);
+    document.getElementById('qty-val').textContent = detailQty;
+  }
+  function addToCartFromDetail() { addToCart(activeDetailIndex, detailQty); closeDetail(); }
+  function orderNowFromDetail() { addToCart(activeDetailIndex, detailQty); closeDetail(); openCart(); }
+  function addToCart(index, qty) {
+    const existing = cart.find(c => c.index === index);
+    if (existing) existing.qty += qty; else cart.push({ index, qty });
+    updateCartUI();
+  }
+  function removeFromCart(index) { cart = cart.filter(c => c.index !== index); updateCartUI(); renderCartItems(); }
+  function cartTotal() {
+    return cart.reduce((sum, c) => {
+      const p = CATALOG[c.index];
+      const price = p.priceUnit ?? p.priceCarton ?? 0;
+      return sum + price * c.qty;
+    }, 0);
+  }
+  function cartCount() { return cart.reduce((s, c) => s + c.qty, 0); }
+  function updateCartUI() {
+    const count = cartCount();
+    const total = cartTotal();
+    const badge = document.getElementById('cart-count');
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+    const mini = document.getElementById('mini-cart');
+    if (count > 0) {
+      mini.classList.add('show');
+      document.getElementById('mini-n').textContent = count + (count > 1 ? ' articles' : ' article');
+      document.getElementById('mini-t').textContent = money(total);
+    } else mini.classList.remove('show');
+  }
+  function openCart() { renderCartItems(); document.getElementById('cart').classList.add('open'); }
+  function closeCart() { document.getElementById('cart').classList.remove('open'); }
+  function renderCartItems() {
+    const wrap = document.getElementById('cart-items');
+    if (cart.length === 0) {
+      wrap.innerHTML = '<p id="empty-cart">Votre panier est vide.</p>';
+    } else {
+      wrap.innerHTML = cart.map(c => {
+        const p = CATALOG[c.index];
+        const price = p.priceUnit ?? p.priceCarton ?? 0;
+        return `
+          <div class="cart-line">
+            <div class="info">
+              <p class="name">${p.name}${p.quality ? ' — ' + p.quality : ''}</p>
+              <p class="meta">${money(price)} × ${c.qty}</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="qty">${money(price * c.qty)}</span>
+              <button onclick="removeFromCart(${c.index})" style="background:none;border:none;color:var(--danger);font-size:18px;">×</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+    document.getElementById('cart-total-val').textContent = money(cartTotal());
+  }
+  function sendWhatsAppOrder() {
+    if (cart.length === 0) return;
+    let msg = "Bonjour Bilgo & Frères, je souhaite commander :%0A";
+    cart.forEach(c => {
+      const p = CATALOG[c.index];
+      msg += `- ${p.name}${p.quality ? ' (' + p.quality + ')' : ''} x${c.qty}%0A`;
+    });
+    msg += `%0ATotal estimé : ${cartTotal().toLocaleString('fr-FR')} FCFA`;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+    window.open(url, "_blank");
+  }
+  renderCatTabs();
+  renderSubTabs();
+  renderGrid();
+  updateCartUI();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  }
+</script>
+
+</body>
+  </html>
