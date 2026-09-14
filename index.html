@@ -420,13 +420,13 @@
   }
   function sendWhatsAppOrder() {
     if (cart.length === 0) return;
-    let msg = "Bonjour Bilgo & Frères, je souhaite commander :%0A";
+    let msg = "Bonjour Bilgo & Frères, je souhaite commander :\n";
     cart.forEach(c => {
       const p = CATALOG[c.index];
-      msg += `- ${p.name}${p.quality ? ' (' + p.quality + ')' : ''} x${c.qty}%0A`;
+      msg += `- ${p.name}${p.quality ? ' (' + p.quality + ')' : ''} x${c.qty}\n`;
     });
-    msg += `%0ATotal estimé : ${cartTotal().toLocaleString('fr-FR')} FCFA`;
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+    msg += `\nTotal estimé : ${cartTotal().toLocaleString('fr-FR')} FCFA`;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
   }
   renderCatTabs();
